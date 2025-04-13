@@ -5,3 +5,10 @@ pandas
 openpyxl
 PyPDF2
 Pillow
+sentence-transformers
+numpy
+torch
+transformers
+llangchain
+langchain_core
+langchain_ollama
