@@ -1,0 +1,7 @@
+unittest2
+pdfplumber
+python-docx
+pandas
+openpyxl
+PyPDF2
+Pillow
