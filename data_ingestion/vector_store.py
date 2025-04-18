@@ -93,6 +93,25 @@ class VectorStore:
             print(f"Updated data with GUID: {guid}")
         else:
             print(f"GUID {guid} not found in vector store.")    
+
+    def search(self, query_embedding, top_k=5):
+        """
+        Search for the top_k most similar embeddings in the vector store.
+
+        :param query_embedding: The embedding to search for.
+        :param top_k: The number of top results to return.
+        :return: List of tuples containing GUID and similarity score.
+        """
+        similarities = []
+        for guid, data in self.vector_store.items():
+            if data["embedding"] is not None:
+                similarity = np.dot(query_embedding, data["embedding"]) / (np.linalg.norm(query_embedding) * np.linalg.norm(data["embedding"]))
+                similarities.append((guid, similarity))
+
+        # Sort by similarity score
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        
+        return similarities[:top_k]
     
     def test(self):
         """

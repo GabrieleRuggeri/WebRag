@@ -12,7 +12,7 @@ class Llama31_8B:
         self.model_id = model_id
         self.temperature = temperature
         self.model = OllamaLLM(model=self.model_id, temperature=self.temperature)
-        self.template = "{question}"
+        self.template = "You are an AI assistant. Answer to the user question being precise and polite:\nUSER QUESTION: {question}"
         self.prompt = ChatPromptTemplate.from_template(self.template)
         self.chain = self.prompt | self.model
 
@@ -34,8 +34,8 @@ class Llama31_8B:
         response = self.chat(query)
         print(f"Response: {response}")
 
-if __name__ == "__main__":
-    # Example usage
-    llama = Llama31_8B()
-    llama.test()
+# if __name__ == "__main__":
+#     # Example usage
+#     llama = Llama31_8B()
+#     llama.test()
         
