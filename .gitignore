@@ -1,5 +1,6 @@
 # Test data
 test_data/
+data/
 
 # Python
 __pycache__/

@@ -12,3 +12,4 @@ transformers
 llangchain
 langchain_core
 langchain_ollama
+pdf2image
