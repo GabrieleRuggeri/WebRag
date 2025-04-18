@@ -3,8 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from embedding.modernbert import EmbeddingModel
-
-from embedding.modernbert import EmbeddingModel
+import numpy as np
 
 class Chunker:
 
@@ -32,7 +31,12 @@ class Embedder:
         embeddings = []
         for chunk in chunks:
             # Generate embedding for each chunk
-            embedding = self.model.encode(query=chunk, type_query="search_document")
+            embedding = np.ndarray([])
+            try:
+                embedding = self.model.encode(query=chunk, type_query="search_document")
+            except Exception as e:
+                print(f"Error generating embedding for chunk: {chunk}\nError: {e}")
+                continue
             embeddings.append(embedding)
         return embeddings
     

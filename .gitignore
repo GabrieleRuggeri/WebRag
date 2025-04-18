@@ -1,6 +1,7 @@
 # Test data
 test_data/
 data/
+data_ingestion/logs
 
 # Python
 __pycache__/

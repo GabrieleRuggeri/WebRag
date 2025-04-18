@@ -35,7 +35,7 @@ class EmbeddingModel:
         print(similarities)
 
 
-if __name__ == "__main__":
-    # Example usage
-    embedding_model = EmbeddingModel("nomic-ai/modernbert-embed-base")
-    embedding_model.test()
+# if __name__ == "__main__":
+#     # Example usage
+#     embedding_model = EmbeddingModel("nomic-ai/modernbert-embed-base")
+#     embedding_model.test()

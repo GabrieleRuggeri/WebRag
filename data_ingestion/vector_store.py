@@ -1,6 +1,7 @@
 import os
 import json 
 import uuid
+import numpy as np
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data')
 
@@ -50,8 +51,14 @@ class VectorStore:
         """
         Save the vector store to a JSON file.
         """
+        def default(o):
+            if isinstance(o, np.ndarray):
+                return o.tolist()
+            raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
+        
         with open(os.path.join(DATA_PATH, "vector_store.json"), 'w') as f:
-            json.dump(self.vector_store, f)
+            json.dump(self.vector_store, f, default=default)
+
 
     def delete_data(self, guid):
         """
@@ -105,9 +112,9 @@ class VectorStore:
         self.delete_data(test_guid)
         print(self.get_data(test_guid))
 
-if __name__ == "__main__":
-    vector_store = VectorStore()
-    vector_store.test()
+# if __name__ == "__main__":
+#     vector_store = VectorStore()
+#     vector_store.test()
             
 
 
