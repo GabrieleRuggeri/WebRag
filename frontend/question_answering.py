@@ -2,15 +2,17 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from llm.llama_3_1 import Llama31_8B
+from llm.llm import LLM
 
 class QA:
 
-    def __init__(self):
+    def __init__(self, model_name: str = "llama3.1:8b", temperature: float = 0.1):
         """
         Initialize the QA class.
         """
-        self.model = Llama31_8B()
+        self.model = LLM(
+            model_id=model_name, 
+            temperature=temperature)
         
 
     def run(self, query: str) -> str:

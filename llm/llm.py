@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 
 
-class Llama31_8B:
+class LLM:
     def __init__(self, model_id : str = "llama3.1:8b", temperature: float = 0.1):
         """
         Initialize the Llama31_8B class.

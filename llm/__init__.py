@@ -1,1 +1,1 @@
-from .llama_3_1 import Llama31_8B
+from .llm import LLM

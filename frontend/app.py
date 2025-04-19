@@ -6,24 +6,27 @@ import streamlit as st
 from streamlit_chat import message
 from question_answering import QA
 import time
+from utils.utilities import response_stream, deep_research_response
 
-AI = QA()
-
-def response_stream(AI : QA, prompt : str):
-    """
-    Function to stream the response from the AI model.
-    """
-    response = AI.run(prompt)
-    for word in response.split():
-        yield word + " "
-        time.sleep(0.05)
 
 # Sidebar
 st.sidebar.title("Settings")
 llm_model = st.sidebar.selectbox(
     "Select LLM Model",
-    ["llama3.1:8b"]  # Replace with actual Ollama served models
+    ["llama3.1:8b", "mistral"]  # Replace with actual Ollama served models
 )
+
+temperature = st.sidebar.slider(
+    "Temperature",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.5,
+    step=0.1
+)
+
+AI = QA(model_name=llm_model, temperature=temperature)
+# File uploader for document upload
+st.sidebar.markdown("---")
 
 uploaded_file = st.sidebar.file_uploader(
     "Upload a Document",
@@ -49,16 +52,52 @@ for message in st.session_state.messages:
 
 # Accept user input
 if prompt := st.chat_input("What is up?"):
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Controlla se il pulsante "Deep Research" è stato cliccato
+    if "deep_research" in st.session_state and st.session_state.deep_research:
+        # Usa un metodo diverso per processare la query
+        with st.chat_message("user"):
+            st.markdown(f"**[Deep Research Mode]** {prompt}")
+        st.session_state.messages.append({"role": "user", "content": f"[Deep Research Mode] {prompt}"})
 
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        response = st.write_stream(response_stream(AI, prompt))
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        # Risposta dell'assistente in modalità Deep Research
+        start_time = time.time()  # Inizio del timer
+        with st.chat_message("assistant"):
+            response = st.write_stream(deep_research_response(AI, prompt))
+        generation_time = time.time() - start_time  # Calcolo del tempo di generazione
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
-    
+        # Mostra informazioni aggiuntive
+        st.markdown(
+            f"<small>Model: {llm_model} | Temperature: {temperature} | Generation Time: {generation_time:.2f}s</small>",
+            unsafe_allow_html=True
+        )
+
+        # Resetta lo stato di "Deep Research"
+        st.session_state.deep_research = False
+    else:
+        # Modalità normale
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
+        # Risposta dell'assistente in modalità normale
+        start_time = time.time()  # Inizio del timer
+        with st.chat_message("assistant"):
+            response = st.write_stream(response_stream(AI, prompt))
+        generation_time = time.time() - start_time  # Calcolo del tempo di generazione
+        st.session_state.messages.append({"role": "assistant", "content": response})
+
+        # Mostra informazioni aggiuntive
+        st.markdown(
+            f"<small>Model: {llm_model} | Temperature: {temperature} | Generation Time: {generation_time:.2f}s</small>",
+            unsafe_allow_html=True
+        )
+
+# Aggiungi il pulsante "Deep Research"
+st.sidebar.markdown("---")
+st.sidebar.title("Deep Research Mode")
+st.sidebar.write("Enable Deep Research mode for more in-depth analysis.")
+st.sidebar.write("This mode may take longer to respond.")
+if st.sidebar.button("Deep Research"):
+    st.session_state.deep_research = True
+
