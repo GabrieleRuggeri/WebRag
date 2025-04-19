@@ -6,6 +6,11 @@ import logging
 from pathlib import Path
 from datetime import datetime
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
 class IngestionPipeline:
     def __init__(self):
         self._setup_logging()
@@ -95,7 +100,7 @@ class IngestionPipeline:
         """
         try:
             self.logger.info("Starting ingestion pipeline test")
-            test_file_path = "../data/pdf_test.pdf"
+            test_file_path = "data/pdf_test.pdf"
             self.run(test_file_path)
             self.logger.info("Ingestion pipeline test completed successfully")
         except Exception as e:
