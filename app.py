@@ -1,10 +1,10 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# assicurati che la root del progetto sia prioritaria nel path
 
 import streamlit as st
 from streamlit_chat import message
-from question_answering import QA
+from backend.question_answering import QA
 import time
 from utils.utilities import response_stream, deep_research_response
 
@@ -13,7 +13,7 @@ from utils.utilities import response_stream, deep_research_response
 st.sidebar.title("Settings")
 llm_model = st.sidebar.selectbox(
     "Select LLM Model",
-    ["llama3.1:8b", "mistral"]  # Replace with actual Ollama served models
+    ["llama3.2:3b", "mistral"]  # Replace with actual Ollama served models
 )
 
 temperature = st.sidebar.slider(

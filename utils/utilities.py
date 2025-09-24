@@ -1,5 +1,5 @@
 import time
-from question_answering import QA
+from backend.question_answering import QA
 
 def response_stream(AI : QA, prompt : str):
     """
