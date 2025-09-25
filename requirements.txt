@@ -16,3 +16,6 @@ pdf2image
 streamlit
 streamlit-chat
 beautifulsoup4
+tavily-python
+python-dotenv
+pytest
