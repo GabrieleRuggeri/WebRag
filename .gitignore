@@ -48,3 +48,24 @@ env/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Data
+*.sqlite3
+*.db
+*.sqlite
+*.parquet
+*.csv
+*.jsonl
+*.json
+*.pkl
+*.h5
+*.hdf5
+*.ckpt
+*.model
+*.bin
+*.npy
+*.npz
