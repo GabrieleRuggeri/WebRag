@@ -6,6 +6,7 @@ import streamlit as st
 from streamlit_chat import message
 from backend.question_answering import QA
 from backend.web_search import WebSearch
+from backend.deep_research import DeepResearch
 import time
 from utils.utilities import response_stream, deep_research_response
 
@@ -61,9 +62,10 @@ if prompt := st.chat_input("What is up?"):
         st.session_state.messages.append({"role": "user", "content": f"[Deep Research Mode] {prompt}"})
 
         # Risposta dell'assistente in modalità Deep Research
+        deep_research = DeepResearch()
         start_time = time.time()  # Inizio del timer
         with st.chat_message("assistant"):
-            response = st.write_stream(deep_research_response(AI, prompt))
+            response = deep_research.search(prompt)
         generation_time = time.time() - start_time  # Calcolo del tempo di generazione
         st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -83,7 +85,7 @@ if prompt := st.chat_input("What is up?"):
         enhanced_prompt = f"{prompt}\n\nHere are some relevant search results:\n{search_context}"
         with st.chat_message("user"):
             st.markdown(prompt)
-        st.session_state.messages.append({"role": "user", "content": enhanced_prompt})  
+        st.session_state.messages.append({"role": "user", "content": prompt})  
         # Risposta dell'assistente in modalità Web Search
         start_time = time.time()  # Inizio del timer
         with st.chat_message("assistant"):

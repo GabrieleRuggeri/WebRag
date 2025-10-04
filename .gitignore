@@ -3,6 +3,9 @@ test_data/
 data/
 data_ingestion/logs
 
+# Scripts
+backend/test_reranker_unit.py
+
 # Python
 __pycache__/
 *.py[cod]
