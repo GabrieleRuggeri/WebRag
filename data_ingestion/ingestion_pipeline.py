@@ -2,9 +2,9 @@ from text_extraction import DocumentExtractor
 from chunking_embedding import Chunker, Embedder
 from vector_store import VectorStore
 import uuid
-import logging
 from pathlib import Path
 from datetime import datetime
+from utils.logging_config import configure_logging_from_env, get_logger
 
 import sys
 import os
@@ -13,7 +13,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class IngestionPipeline:
     def __init__(self):
-        self._setup_logging()
+        # configure based on env and create a module logger
+        configure_logging_from_env(log_file=None)
+        self.logger = get_logger(__name__)
         self.logger.info("Initializing IngestionPipeline")
         self.extractor = DocumentExtractor()
         self.chunker = Chunker()
@@ -21,26 +23,9 @@ class IngestionPipeline:
         self.logger.info("IngestionPipeline components initialized successfully")
 
     def _setup_logging(self):
-        """Configure logging with detailed formatting and file output"""
-        # Create logs directory if it doesn't exist
-        log_dir = Path("logs")
-        log_dir.mkdir(exist_ok=True)
-        
-        # Create a unique log file for each run
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = log_dir / f"ingestion_pipeline_{timestamp}.log"
-        
-        # Configure logging format and settings
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s [%(levelname)s] %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
-        )
-        self.logger = logging.getLogger(__name__)
-        self.logger.info(f"Logging initialized. Log file: {log_file}")
+        # legacy method kept for compatibility but no longer used; configuration
+        # is performed centrally via utils.logging_config.configure_logging_from_env
+        pass
 
     def run(self, file_path: str):
         """

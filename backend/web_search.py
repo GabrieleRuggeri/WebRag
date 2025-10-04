@@ -1,15 +1,11 @@
 import os
-import logging
 from dotenv import load_dotenv
 from tavily import TavilyClient
+from utils.logging_config import configure_logging_from_env, get_logger
 
-# Load environment variables from a .env file (if present)
-load_dotenv()
-
-# Configure a module-level logger if global logging hasn't been configured yet
-logger = logging.getLogger(__name__)
-if not logging.getLogger().handlers:
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+# Ensure logging is configured according to environment (DEBUG env var)
+configure_logging_from_env()
+logger = get_logger(__name__)
 
 
 class WebSearch:

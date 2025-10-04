@@ -9,6 +9,10 @@ from backend.web_search import WebSearch
 from backend.deep_research import DeepResearch
 import time
 from utils.utilities import response_stream, deep_research_response
+from utils.logging_config import configure_logging_from_env
+from utils.env_loader import load_env
+
+
 
 
 # Sidebar
@@ -47,6 +51,10 @@ st.write("This is a simple chat interface powered by LLM.")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Load environment variables from .env (if present) and configure logging
+load_env()
+configure_logging_from_env()
+
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -66,6 +74,7 @@ if prompt := st.chat_input("What is up?"):
         start_time = time.time()  # Inizio del timer
         with st.chat_message("assistant"):
             response = deep_research.search(prompt)
+            response = st.write_stream((_ for _ in response))
         generation_time = time.time() - start_time  # Calcolo del tempo di generazione
         st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -84,7 +93,7 @@ if prompt := st.chat_input("What is up?"):
         search_context = "\n".join([f"- {result['title']}: {result['content']}" for result in search_results])
         enhanced_prompt = f"{prompt}\n\nHere are some relevant search results:\n{search_context}"
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(f"**[Web Search]** {prompt}")
         st.session_state.messages.append({"role": "user", "content": prompt})  
         # Risposta dell'assistente in modalità Web Search
         start_time = time.time()  # Inizio del timer
