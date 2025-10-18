@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_chat import message
 from backend.question_answering import QA
 from backend.web_search import WebSearch
 from backend.deep_research import DeepResearch
