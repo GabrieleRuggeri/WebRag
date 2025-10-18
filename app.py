@@ -9,8 +9,8 @@ from utils.utilities import response_stream, generate_conversation_title
 from utils.logging_config import configure_logging_from_env
 from utils.env_loader import load_env
 
-# Sidebar
-with st.sidebar.expander("Settings", expanded=False):
+# Sidebar - Settings (always expanded)
+with st.sidebar.expander("Settings", expanded=True):
     llm_model = st.selectbox(
         "LLM Model",
         ["qwen2.5:1.5b", "llama3.2:3b", "mistral"],
@@ -24,15 +24,6 @@ with st.sidebar.expander("Settings", expanded=False):
         step=0.1,
         key="temp_slider",
     )
-
-with st.sidebar.expander("Upload", expanded=False):
-    uploaded_file = st.file_uploader(
-        "Upload a Document",
-        type=["pdf", "docx", "txt"],
-        key="doc_uploader",
-    )
-    if uploaded_file:
-        st.success(f"Uploaded: {uploaded_file.name}")
 
 AI = QA(model_name=llm_model, temperature=temperature)
 
@@ -76,31 +67,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Mode indicator
-current_mode = (
-    "Deep Research" if st.session_state.get("deep_research")
-    else ("Web Search" if st.session_state.get("web_search") else "Normal")
-)
-# Visual badge (color + icon), no text label
-if current_mode == "Deep Research":
-    _mode_color, _mode_icon = "#8b5cf6", "🔬"
-elif current_mode == "Web Search":
-    _mode_color, _mode_icon = "#3b82f6", "🔎"
-else:
-    _mode_color, _mode_icon = "#9ca3af", "💬"
-
-_indicator_html = f"""
-<div style="display:flex; justify-content:flex-end; margin: 2px 0 6px 0;">
-  <div title=\"{current_mode}\" style="
-       display:flex; align-items:center; gap:6px;
-       padding:4px 10px; border-radius:999px;
-       background:rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06);">
-    <span style=\"width:10px;height:10px;border-radius:50%;background:{_mode_color};display:inline-block;\"></span>
-    <span style=\"font-size:14px\">{_mode_icon}</span>
-  </div>
-</div>
-"""
-st.markdown(_indicator_html, unsafe_allow_html=True)
+# Removed mode indicator icons to simplify UI
 
 # Accept user input
 if prompt := st.chat_input("What is up?"):
@@ -193,8 +160,8 @@ if prompt := st.chat_input("What is up?"):
 
 # (Old duplicated mode buttons removed)
 
-# Sidebar: Previous Chats menu and modes
-with st.sidebar.expander("Previous Chats", expanded=True):
+# Sidebar: Chats
+with st.sidebar.expander("Chats", expanded=True):
     convs = store.list_conversations(user_id)
     if not convs:
         conv = store.get_conversation(user_id, conversation_id)
@@ -232,37 +199,63 @@ with st.sidebar.expander("Previous Chats", expanded=True):
         st.session_state._loaded_cid = new_cid
         st.rerun()
 
-with st.sidebar.expander("Modes", expanded=False):
-    # Visual indicator only (tooltip shows mode)
-    st.markdown(_indicator_html, unsafe_allow_html=True)
-    if st.button("Deep Research", key="deep_research_btn"):
-        current = st.session_state.get("deep_research", False)
-        new_val = not current
+# Sidebar: Modes
+with st.sidebar.expander("Modes", expanded=True):
+    # Style active (primary) buttons in the sidebar as green (robust selectors)
+    st.markdown(
+        """
+        <style>
+        /* Streamlit primary buttons in the sidebar */
+        div[data-testid="stSidebar"] .stButton > button[kind="primary"],
+        div[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
+        div[data-testid="stSidebar"] .stButton > button.st-emotion-cache-primary {
+            background-color: #22c55e !important; /* green */
+            border-color: #16a34a !important;
+            color: #ffffff !important;
+        }
+        div[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover,
+        div[data-testid="stSidebar"] button[data-testid="baseButton-primary"]:hover,
+        div[data-testid="stSidebar"] .stButton > button.st-emotion-cache-primary:hover {
+            background-color: #16a34a !important;
+            border-color: #15803d !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    dr_active = st.session_state.get("deep_research", False)
+    ws_active = st.session_state.get("web_search", False)
+
+    if st.button(
+        "Deep Research",
+        key="deep_research_btn",
+        type=("primary" if dr_active else "secondary"),
+        use_container_width=True,
+    ):
+        new_val = not dr_active
         st.session_state.deep_research = new_val
         if new_val:
             st.session_state.web_search = False
-    if st.button("Web Search", key="web_search_btn"):
-        current = st.session_state.get("web_search", False)
-        new_val = not current
+        st.rerun()
+
+    if st.button(
+        "Web Search",
+        key="web_search_btn",
+        type=("primary" if ws_active else "secondary"),
+        use_container_width=True,
+    ):
+        new_val = not ws_active
         st.session_state.web_search = new_val
         if new_val:
             st.session_state.deep_research = False
-    # Legend for mode icons/colors
-    st.caption("Legend")
-    _legend_html = """
-    <div style="font-size: 0.9em; margin-top: 2px;">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#8b5cf6;display:inline-block;"></span>
-        <span>🔬 Deep Research</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block;"></span>
-        <span>🔎 Web Search</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#9ca3af;display:inline-block;"></span>
-        <span>💬 Normal</span>
-      </div>
-    </div>
-    """
-    st.markdown(_legend_html, unsafe_allow_html=True)
+        st.rerun()
+
+# Sidebar: Upload (move to bottom)
+with st.sidebar.expander("Upload", expanded=True):
+    uploaded_file = st.file_uploader(
+        "Upload a Document",
+        type=["pdf", "docx", "txt"],
+        key="doc_uploader",
+    )
+    if uploaded_file:
+        st.success(f"Uploaded: {uploaded_file.name}")
