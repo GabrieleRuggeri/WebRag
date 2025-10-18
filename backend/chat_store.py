@@ -1,4 +1,5 @@
 import os
+import csv
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -143,3 +144,142 @@ class ChatStore:
                 return conversation_id
         return self.create_conversation(user_id)
 
+    def debug_print_all(self, max_content_len: int = 1000) -> None:
+        """Pretty print all conversations and messages for quick debugging.
+
+        Prints all conversations (any user, including archived) ordered by
+        most recently updated, and their messages ordered by creation time.
+
+        Args:
+            max_content_len: Maximum characters of message content to display.
+        """
+        with self._connect() as conn:
+            # Fetch conversations and messages in two queries for speed.
+            conv_rows = conn.execute(
+                """
+                SELECT id, user_id, title, created_at, updated_at, archived
+                FROM conversations
+                ORDER BY updated_at DESC
+                """
+            ).fetchall()
+
+            msg_rows = conn.execute(
+                """
+                SELECT id, conversation_id, user_id, role, content, created_at
+                FROM messages
+                ORDER BY created_at ASC
+                """
+            ).fetchall()
+
+        # Group messages by conversation id
+        messages_by_conv: Dict[str, List[sqlite3.Row]] = {}
+        for r in msg_rows:
+            messages_by_conv.setdefault(r["conversation_id"], []).append(r)
+
+        print("=== ChatStore Debug Dump ===")
+        print(f"Conversations: {len(conv_rows)}")
+        for idx, conv in enumerate(conv_rows, start=1):
+            conv_id = conv["id"]
+            user = conv["user_id"]
+            archived = int(conv["archived"]) if conv["archived"] is not None else 0
+            created = conv["created_at"]
+            updated = conv["updated_at"]
+
+            print(
+                f"\n[{idx}] Conversation {conv_id} | user={user} | archived={archived}\n"
+                f"    title=""{title}""\n"
+                f"    created_at={created}\n"
+                f"    updated_at={updated}"
+            )
+
+            msgs = messages_by_conv.get(conv_id, [])
+            print(f"    messages ({len(msgs)}):")
+            for m in msgs:
+                ts = m["created_at"]
+                role = m["role"]
+                m_user = m["user_id"]
+                content = m["content"] or ""
+                if max_content_len and len(content) > max_content_len:
+                    content = content[: max_content_len - 1] + "…"
+                print(f"      - [{ts}] {role}@{m_user}: {content}")
+
+    def export_csv(
+        self,
+        out_path: Optional[str] = None,
+        include_archived: bool = True,
+        max_content_len: Optional[int] = None,
+    ) -> str:
+        """Export conversations and messages to a single CSV file.
+
+        Each row contains conversation metadata and a message (if any).
+        Conversations without messages are still included with empty message fields.
+
+        Args:
+            out_path: Destination CSV path. Defaults to chat_data/chat_export.csv
+            include_archived: Whether to include archived conversations.
+            max_content_len: If provided, truncate message content to this length.
+
+        Returns:
+            The path to the written CSV file.
+        """
+        if out_path is None:
+            out_dir = os.path.dirname(self.db_path) or "."
+            out_path = os.path.join(out_dir, "chat_export.csv")
+
+        query = (
+            "SELECT c.id AS conv_id, c.user_id AS conv_user_id, c.title AS conv_title, "
+            "c.created_at AS conv_created_at, c.updated_at AS conv_updated_at, c.archived AS conv_archived, "
+            "m.id AS msg_id, m.user_id AS msg_user_id, m.role AS msg_role, m.content AS msg_content, m.created_at AS msg_created_at "
+            "FROM conversations c LEFT JOIN messages m ON m.conversation_id = c.id "
+        )
+        params: tuple = ()
+        if include_archived:
+            query += "ORDER BY c.updated_at DESC, m.created_at ASC"
+        else:
+            query += "WHERE c.archived = 0 ORDER BY c.updated_at DESC, m.created_at ASC"
+
+        with self._connect() as conn:
+            rows = conn.execute(query, params).fetchall()
+
+        os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+        fieldnames = [
+            "conv_id",
+            "conv_user_id",
+            "conv_title",
+            "conv_created_at",
+            "conv_updated_at",
+            "conv_archived",
+            "msg_id",
+            "msg_user_id",
+            "msg_role",
+            "msg_content",
+            "msg_created_at",
+        ]
+
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in rows:
+                content = r["msg_content"] if r["msg_content"] is not None else ""
+                if max_content_len is not None and max_content_len >= 0 and len(content) > max_content_len:
+                    content = content[: max_content_len]
+                writer.writerow(
+                    {
+                        "conv_id": r["conv_id"],
+                        "conv_user_id": r["conv_user_id"],
+                        "conv_title": r["conv_title"],
+                        "conv_created_at": r["conv_created_at"],
+                        "conv_updated_at": r["conv_updated_at"],
+                        "conv_archived": r["conv_archived"],
+                        "msg_id": r["msg_id"],
+                        "msg_user_id": r["msg_user_id"],
+                        "msg_role": r["msg_role"],
+                        "msg_content": content,
+                        "msg_created_at": r["msg_created_at"],
+                    }
+                )
+
+        return out_path
+
+if __name__ == "__main__":
+    store = ChatStore()

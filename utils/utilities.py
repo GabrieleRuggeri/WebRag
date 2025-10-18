@@ -1,6 +1,6 @@
 import time
 from backend.question_answering import QA
-from typing import Optional, List, Dict
+from typing import List, Dict
 
 def response_stream(AI : QA, prompt : str):
     """
