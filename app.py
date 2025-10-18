@@ -5,7 +5,7 @@ from backend.deep_research import DeepResearch
 from backend.chat_store import ChatStore
 import uuid
 import time
-from utils.utilities import response_stream
+from utils.utilities import response_stream, generate_conversation_title
 from utils.logging_config import configure_logging_from_env
 from utils.env_loader import load_env
 
@@ -115,7 +115,12 @@ if prompt := st.chat_input("What is up?"):
         # Set conversation title if empty
         conv = store.get_conversation(user_id, conversation_id)
         if conv and not conv.get("title"):
-            store.rename_conversation(user_id, conversation_id, user_msg_content[:80])
+            try:
+                msgs = store.get_messages(user_id, conversation_id)
+                title = generate_conversation_title(AI, msgs, user_msg_content)
+            except Exception:
+                title = user_msg_content[:80]
+            store.rename_conversation(user_id, conversation_id, title)
 
         # Risposta dell'assistente in modalità Deep Research
         deep_research = DeepResearch()
