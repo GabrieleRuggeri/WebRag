@@ -5,23 +5,9 @@ This module is intended to provide extractor classes for pdf, docx and txt docum
 from typing import List, Dict
 from abc import ABC, abstractmethod
 import os
-import re
 import logging
 import pdfplumber
-import docx
 from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.oxml import parse_xml
-from docx.shared import Inches
-from docx.oxml.ns import qn
-from PyPDF2 import PdfReader
-from PyPDF2.errors import PdfReadError
-from io import BytesIO              
-from PIL import Image
-from pdf2image import convert_from_path
 
 
 

@@ -9,3 +9,5 @@
 # __version__ = "1.0.0"
 
 from .modernbert import EmbeddingModel
+
+__all__ = ['EmbeddingModel']

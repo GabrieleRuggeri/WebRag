@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from tavily import TavilyClient
 from utils.logging_config import configure_logging_from_env, get_logger
 

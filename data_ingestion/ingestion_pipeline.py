@@ -2,8 +2,6 @@ from text_extraction import DocumentExtractor
 from chunking_embedding import Chunker, Embedder
 from vector_store import VectorStore
 import uuid
-from pathlib import Path
-from datetime import datetime
 from utils.logging_config import configure_logging_from_env, get_logger
 
 import sys
