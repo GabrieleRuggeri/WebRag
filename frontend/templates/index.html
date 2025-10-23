@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRage Chatbot</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <section class="sidebar-section">
+                <h2>Settings</h2>
+                <label for="model-select">LLM Model</label>
+                <select id="model-select" class="input-control">
+                    {% for model in models %}
+                        <option value="{{ model }}" {% if model == selected_model %}selected{% endif %}>{{ model }}</option>
+                    {% endfor %}
+                </select>
+                <label for="temperature-slider">Temperature <span id="temperature-value">{{ '%.1f' | format(temperature) }}</span></label>
+                <input id="temperature-slider" type="range" min="0" max="1" step="0.1" value="{{ '%.1f' | format(temperature) }}">
+            </section>
+
+            <section class="sidebar-section">
+                <h2>Modes</h2>
+                <div class="mode-buttons">
+                    <button id="deep-research-btn" class="mode-btn" type="button">Deep Research</button>
+                    <button id="web-search-btn" class="mode-btn" type="button">Web Search</button>
+                </div>
+                <p class="mode-hint">Only one mode can be active at a time.</p>
+            </section>
+
+            <section class="sidebar-section">
+                <h2>Chats</h2>
+                <label for="conversation-select" class="sr-only">Select conversation</label>
+                <select id="conversation-select" class="input-control">
+                    {% for conv in conversations %}
+                        <option value="{{ conv.id }}" {% if conv.id == conversation_id %}selected{% endif %}>{{ conv.title or ('Conversation ' ~ conv.id[:8]) }}</option>
+                    {% endfor %}
+                </select>
+                <button id="new-conversation-btn" class="primary-btn" type="button">New conversation</button>
+            </section>
+
+            <section class="sidebar-section">
+                <h2>Upload</h2>
+                <form id="upload-form" class="upload-form">
+                    <input type="file" id="upload-input" name="file" accept=".pdf,.docx,.txt">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <input type="hidden" name="conversation_id" value="{{ conversation_id }}">
+                    <button class="primary-btn" type="submit">Upload</button>
+                </form>
+                <div id="upload-status" class="upload-status"></div>
+            </section>
+        </aside>
+
+        <main class="chat-panel">
+            <header class="chat-header">
+                <h1>WebRage Chatbot</h1>
+                <p>Ask me anything! I can help you with your questions.</p>
+                <p class="subtitle">This is a simple chat interface powered by LLM.</p>
+            </header>
+
+            <section id="chat-messages" class="chat-messages" aria-live="polite">
+                {% for message in messages %}
+                    <div class="chat-message {{ message.role }}">
+                        <div class="avatar">{{ 'You' if message.role == 'user' else 'AI' }}</div>
+                        <div class="message-content">{{ message.content }}</div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <footer class="chat-footer">
+                <form id="chat-form" class="chat-form">
+                    <textarea id="chat-input" name="prompt" rows="2" placeholder="What is up?" required></textarea>
+                    <div class="chat-actions">
+                        <button class="primary-btn" type="submit">Send</button>
+                    </div>
+                </form>
+                <div id="chat-meta" class="chat-meta"></div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const initialState = {
+            userId: "{{ user_id }}",
+            conversationId: "{{ conversation_id }}",
+            model: "{{ selected_model }}",
+            temperature: {{ '%.1f' | format(temperature) }},
+            messages: {{ messages_json | safe }},
+            conversations: {{ conversations_json | safe }}
+        };
+    </script>
+    <script src="{{ url_for('static', path='js/app.js') }}" defer></script>
+</body>
+</html>

@@ -38,11 +38,11 @@ class WebSearch:
         self.logger.debug("Performing web search: query=%s num_results=%d", query, num_results)
         try:
             results = self.client.search(
-                    query=query, 
-                    num_results=num_results, 
-                    include_images=False, 
-                    search_depth="advanced"
-                )
+                query=query,
+                max_results=num_results,
+                include_images=False,
+                search_depth="advanced",
+            )
             hits = results.get("results", []) if isinstance(results, dict) else results
             self.logger.info("Web search completed: returned %d hits", len(hits))
             return hits
