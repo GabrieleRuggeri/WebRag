@@ -18,13 +18,13 @@ jobs:
     - name: Install dependencies
       run: |
         python - <<'PY'
-import pathlib, subprocess, tomllib
-project = tomllib.loads(pathlib.Path("pyproject.toml").read_text()).get("project", {})
-deps = project.get("dependencies", [])
-if deps:
-    subprocess.run(["uv", "pip", "install", "--system", *deps], check=True)
-PY
-        uv pip install --system pylint
+        import pathlib, subprocess, tomllib
+        project = tomllib.loads(pathlib.Path("pyproject.toml").read_text()).get("project", {})
+        deps = project.get("dependencies", [])
+        if deps:
+            subprocess.run(["uv", "pip", "install", "--system", *deps], check=True)
+        PY
+                uv pip install --system pylint
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
