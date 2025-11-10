@@ -1,0 +1,19 @@
+[project]
+name = "webrag"
+version = "0.1.0"
+description = "Local RAG assistant that ingests documents, searches the web, and answers questions via LangChain + Ollama-backed LLMs."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-core",
+    "langchain-ollama",
+    "numpy",
+    "pdfplumber",
+    "python-docx",
+    "python-dotenv",
+    "sentence-transformers",
+    "streamlit",
+    "tavily-python",
+    "torch",
+    "transformers",
+]
