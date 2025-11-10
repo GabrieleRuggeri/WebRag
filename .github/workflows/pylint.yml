@@ -17,7 +17,13 @@ jobs:
       uses: astral-sh/setup-uv@v1
     - name: Install dependencies
       run: |
-        uv pip install --system .
+        python - <<'PY'
+import pathlib, subprocess, tomllib
+project = tomllib.loads(pathlib.Path("pyproject.toml").read_text()).get("project", {})
+deps = project.get("dependencies", [])
+if deps:
+    subprocess.run(["uv", "pip", "install", "--system", *deps], check=True)
+PY
         uv pip install --system pylint
     - name: Analysing the code with pylint
       run: |
