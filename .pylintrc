@@ -1,0 +1,8 @@
+[MASTER]
+ignore=logs
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring,missing-class-docstring,missing-function-docstring,wrong-import-order,wrong-import-position,invalid-name,protected-access,broad-exception-caught,trailing-whitespace,trailing-newlines,missing-final-newline,too-many-locals,chained-comparison,redefined-outer-name,unnecessary-comprehension,too-many-instance-attributes,too-many-arguments,too-many-positional-arguments,import-outside-toplevel,consider-using-enumerate,too-few-public-methods,no-member,unnecessary-pass,logging-fstring-interpolation,unspecified-encoding,import-error
+
+[FORMAT]
+max-line-length=180
