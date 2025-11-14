@@ -8,6 +8,6 @@
 # Example:
 # __version__ = "1.0.0"
 
-from .modernbert import EmbeddingModel
+from .embedder import EmbeddingModel
 
 __all__ = ['EmbeddingModel']

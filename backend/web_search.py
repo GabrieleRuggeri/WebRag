@@ -37,7 +37,7 @@ class WebSearch:
         """
         self.logger.debug("Performing web search: query=%s num_results=%d", query, num_results)
         try:
-            results = self.client.search(
+            results = self.client.search( # type: ignore
                     query=query, 
                     num_results=num_results, 
                     include_images=False, 

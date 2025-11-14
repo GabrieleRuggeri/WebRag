@@ -18,7 +18,7 @@ class EmbeddingModel:
             raise ValueError("Type must be 'search_query' or 'search_document'")
         
         input_query = [f"{type_query}: {query}"]
-        return self.model.encode(input_query)
+        return self.model.encode(input_query) # type: ignore
 
     def similarity(self, query_embeddings : ndarray, doc_embeddings : ndarray) -> Tensor:
         return self.model.similarity(query_embeddings, doc_embeddings)
@@ -31,11 +31,11 @@ class EmbeddingModel:
         query_embeddings = self.encode("What is TSNE?", "search_query")
         doc_embeddings = self.encode("TSNE is a dimensionality reduction algorithm created by Laurens van Der Maaten", "search_document")
         
-        similarities = self.similarity(query_embeddings, doc_embeddings)
+        similarities = self.similarity(query_embeddings, doc_embeddings) # type: ignore
         print(similarities)
 
 
-# if __name__ == "__main__":
-#     # Example usage
-#     embedding_model = EmbeddingModel("nomic-ai/modernbert-embed-base")
-#     embedding_model.test()
+if __name__ == "__main__":
+    # Example usage
+    embedding_model = EmbeddingModel("nomic-ai/modernbert-embed-base")
+    embedding_model.test()

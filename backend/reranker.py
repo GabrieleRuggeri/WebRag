@@ -16,7 +16,6 @@ class Reranker:
         self,
         model_name: str = "Qwen/Qwen3-Reranker-0.6B",
         max_length: int = 8192,
-        device: Optional[str] = None,
         tokenizer=None,
         model=None,
     ):
@@ -24,7 +23,7 @@ class Reranker:
         self._provided_tokenizer = tokenizer
         self._provided_model = model
         self._model_name = model_name
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.max_length = max_length
 
         # internal state filled on _ensure_model_loaded
@@ -57,7 +56,7 @@ class Reranker:
 
             self.tokenizer = AutoTokenizer.from_pretrained(self._model_name, padding_side='left')
             self.model = AutoModelForCausalLM.from_pretrained(self._model_name).eval()
-            self.model.to(self.device)
+            self.model.to(self.device) # type: ignore
 
         # prepare token ids and prefix/suffix token lists
         self.token_false_id = self.tokenizer.convert_tokens_to_ids("no")
@@ -76,7 +75,7 @@ class Reranker:
         tokenizer = self.tokenizer
         prefix_tokens = self.prefix_tokens
         suffix_tokens = self.suffix_tokens
-        max_len = self.max_length - len(prefix_tokens) - len(suffix_tokens)
+        max_len = self.max_length - len(prefix_tokens) - len(suffix_tokens) # type: ignore
 
         inputs = tokenizer(
             pairs,
@@ -84,13 +83,13 @@ class Reranker:
             truncation='longest_first',
             return_attention_mask=False,
             max_length=max_len,
-        )
+        ) # type: ignore
         # preprend/append tokens per-example
         input_ids = inputs['input_ids']
         for i in range(len(input_ids)):
             input_ids[i] = prefix_tokens + input_ids[i] + suffix_tokens
         # pad and convert to tensors
-        inputs = tokenizer.pad(inputs, padding=True, return_tensors="pt", max_length=self.max_length)
+        inputs = tokenizer.pad(inputs, padding=True, return_tensors="pt", max_length=self.max_length) # type: ignore
         # move tensors to device
         for k, v in list(inputs.items()):
             inputs[k] = v.to(self.device)
@@ -99,7 +98,7 @@ class Reranker:
     @torch.no_grad()
     def _compute_logits(self, inputs):
         # get logits for last token and compute probability yes
-        logits = self.model(**inputs).logits[:, -1, :]
+        logits = self.model(**inputs).logits[:, -1, :] # type: ignore
         true_vector = logits[:, self.token_true_id]
         false_vector = logits[:, self.token_false_id]
         stacked = torch.stack([false_vector, true_vector], dim=1)

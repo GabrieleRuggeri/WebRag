@@ -105,7 +105,7 @@ class VectorStore:
         similarities = []
         for guid, data in self.vector_store.items():
             if data["embedding"] is not None:
-                similarity = np.dot(query_embedding, data["embedding"]) / (np.linalg.norm(query_embedding) * np.linalg.norm(data["embedding"]))
+                similarity = np.dot(query_embedding, data["embedding"]) / (np.linalg.norm(query_embedding) * np.linalg.norm(data["embedding"])) # type: ignore
                 similarities.append((guid, similarity))
 
         # Sort by similarity score
